@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(more:*)",
+      "Bash(timeout:*)",
+      "Bash(ping:*)",
+      "Bash(curl:*)",
+      "mcp__playwright__browser_navigate",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_handle_dialog",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(rm:*)",
+      "Read(//d/**)",
+      "Bash(del:*)",
+      "Bash(cd:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

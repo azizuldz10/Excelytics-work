@@ -1,0 +1,241 @@
+            <!-- Revenue Analytics Section -->
+            <div id="revenue-section" class="content-section" style="display: none;">
+                <h2 class="mb-4">
+                    <i class="fas fa-chart-bar me-2"></i>Analisis Revenue Dashboard
+                </h2>
+
+                <!-- Info Alert -->
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Dashboard Revenue:</strong> Analisis mendalam tentang sumber revenue dari berbagai dimensi (paket, lokasi, sales) untuk mengidentifikasi driver utama dan peluang pertumbuhan.
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="row g-4 mb-4" id="revenue-summary">
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-muted small mb-1">Total Revenue</p>
+                                        <h3 class="mb-0" id="total-revenue">-</h3>
+                                    </div>
+                                    <div class="stat-icon" style="background: rgba(78, 115, 223, 0.1); color: var(--primary-color);">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-muted small mb-1">Active Customers</p>
+                                        <h3 class="mb-0" id="revenue-customers">-</h3>
+                                    </div>
+                                    <div class="stat-icon" style="background: rgba(28, 200, 138, 0.1); color: var(--success-color);">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-muted small mb-1">Average ARPU</p>
+                                        <h5 class="mb-0" id="average-arpu">-</h5>
+                                    </div>
+                                    <div class="stat-icon" style="background: rgba(54, 185, 204, 0.1); color: var(--info-color);">
+                                        <i class="fas fa-calculator"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-muted small mb-1">Top Performer</p>
+                                        <h5 class="mb-0" id="top-package-name">-</h5>
+                                        <small class="text-muted" id="top-package-revenue">-</small>
+                                    </div>
+                                    <div class="stat-icon" style="background: rgba(246, 194, 62, 0.1); color: var(--warning-color);">
+                                        <i class="fas fa-crown"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 1: Revenue by Package & Location -->
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-cube me-2"></i>Revenue by Package
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="revenueByPackageChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-map-pin me-2"></i>Revenue by Location (Top 15)
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="revenueByLocationChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2: Revenue by Sales & Price Distribution -->
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user-tie me-2"></i>Revenue by Sales
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="revenueBySalesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tags me-2"></i>Price Range Distribution
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="priceRangeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Tables -->
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>Revenue by Package (Detail)
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover" id="packageTable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Package</th>
+                                                <th class="text-end">Revenue</th>
+                                                <th class="text-end">%</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="packageTableBody">
+                                            <tr><td colspan="3" class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-map me-2"></i>Revenue by Location (Detail)
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover" id="locationTable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Location</th>
+                                                <th class="text-end">Revenue</th>
+                                                <th class="text-end">%</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="locationTableBody">
+                                            <tr><td colspan="3" class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-person me-2"></i>Revenue by Sales (Detail)
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover" id="salesTable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Sales</th>
+                                                <th class="text-end">Revenue</th>
+                                                <th class="text-end">%</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="salesTableBody">
+                                            <tr><td colspan="3" class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights Section -->
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-lightbulb me-2"></i>Key Insights
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3" id="insightsContainer">
+                                    <div class="col-12 text-center text-muted">
+                                        <i class="fas fa-spinner fa-spin"></i> Generating insights...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
