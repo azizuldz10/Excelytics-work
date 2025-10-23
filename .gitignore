@@ -18,6 +18,7 @@ data-wifi.xls
 venv/
 *.log
 .playwright-mcp/
+.claude/settings.local.json
 
 # Development docs (local only)
 DEVELOPMENT_ROADMAP.md
@@ -30,3 +31,5 @@ NEXT_STEPS_SUMMARY.txt
 PENGEMBANGAN_SELANJUTNYA.md
 QUICK_START_HISTORY.md
 revenue_analytics_section.html
+QUICK_START_ANALYTICS.md
+WEEK_4_7_COMPLETION_REPORT.md

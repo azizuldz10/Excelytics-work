@@ -2450,6 +2450,8 @@
                 loadSegmentation();
             } else if (section === 'profitability') {
                 loadProfitability();
+            } else if (section === 'churn') {
+                loadChurnAnalysis();
             } else if (section === 'history') {
                 loadHistoryData();
                 loadTrendData();
@@ -4887,6 +4889,354 @@
                     </div>
                 `;
                 insightsContainer.appendChild(col);
+            });
+        }
+
+        // ============================================
+        // CHURN ANALYSIS FUNCTIONS
+        // ============================================
+
+        function loadChurnAnalysis() {
+            fetch('/api/churn-analysis')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        try {
+                            updateChurnStats(data.summary);
+                            console.log('Churn stats updated');
+                        } catch (e) {
+                            console.error('Error updating churn stats:', e);
+                        }
+
+                        try {
+                            createChurnCharts(data.summary, data.by_package, data.by_location);
+                            console.log('Churn charts created');
+                        } catch (e) {
+                            console.error('Error creating churn charts:', e);
+                        }
+
+                        try {
+                            updateAtRiskCustomersTable(data.at_risk_customers);
+                            console.log('At-risk customers table updated');
+                        } catch (e) {
+                            console.error('Error updating at-risk table:', e);
+                        }
+
+                        try {
+                            displayRetentionStrategies(data.retention_strategies);
+                            console.log('Retention strategies displayed');
+                        } catch (e) {
+                            console.error('Error displaying strategies:', e);
+                        }
+
+                        try {
+                            generateChurnInsights(data.summary, data.insights);
+                            console.log('Churn insights generated');
+                        } catch (e) {
+                            console.error('Error generating insights:', e);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading churn analysis:', error);
+                    document.getElementById('atRiskCustomersBody').innerHTML =
+                        '<tr><td colspan="7" class="text-center text-danger">Error loading data. Please refresh.</td></tr>';
+                });
+        }
+
+        function updateChurnStats(summary) {
+            document.getElementById('churn-total-customers').textContent =
+                summary.total_customers.toLocaleString();
+            document.getElementById('churn-avg-risk').textContent =
+                summary.avg_churn_risk_score.toFixed(1) + '%';
+            document.getElementById('churn-revenue-at-risk').textContent =
+                'Rp ' + (summary.revenue_at_risk / 1000000).toFixed(1) + 'M';
+            document.getElementById('churn-recovery-potential').textContent =
+                'Rp ' + (summary.potential_recovery_value / 1000000).toFixed(1) + 'M';
+        }
+
+        function createChurnCharts(summary, byPackage, byLocation) {
+            // Chart 1: Risk Distribution (Pie)
+            const riskLevels = ['Critical', 'High', 'Medium', 'Low'];
+            const riskCounts = [
+                summary.critical_risk_count,
+                summary.high_risk_count,
+                summary.medium_risk_count,
+                summary.low_risk_count
+            ];
+            const riskColors = ['#DC3545', '#FFC107', '#FFC107', '#28A745'];
+
+            const riskCtx = document.getElementById('churnRiskDistributionChart').getContext('2d');
+            if (window.churnRiskDistributionChart && typeof window.churnRiskDistributionChart.destroy === 'function') {
+                window.churnRiskDistributionChart.destroy();
+            }
+
+            window.churnRiskDistributionChart = new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: riskLevels,
+                    datasets: [{
+                        data: riskCounts,
+                        backgroundColor: riskColors,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Chart 2: Churn by Package
+            const packageNames = Object.keys(byPackage);
+            const packageChurnRisks = packageNames.map(p => byPackage[p].avg_churn_risk);
+
+            const pkgCtx = document.getElementById('churnByPackageChart').getContext('2d');
+            if (window.churnByPackageChart && typeof window.churnByPackageChart.destroy === 'function') {
+                window.churnByPackageChart.destroy();
+            }
+
+            window.churnByPackageChart = new Chart(pkgCtx, {
+                type: 'bar',
+                data: {
+                    labels: packageNames,
+                    datasets: [{
+                        label: 'Avg Churn Risk %',
+                        data: packageChurnRisks,
+                        backgroundColor: '#FF6B6B',
+                        borderColor: '#DC3545',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 3: Churn by Location (Top 10)
+            const locationNames = Object.keys(byLocation);
+            const locationChurnRisks = locationNames.map(l => byLocation[l].avg_churn_risk);
+
+            const locCtx = document.getElementById('churnByLocationChart').getContext('2d');
+            if (window.churnByLocationChart && typeof window.churnByLocationChart.destroy === 'function') {
+                window.churnByLocationChart.destroy();
+            }
+
+            window.churnByLocationChart = new Chart(locCtx, {
+                type: 'bar',
+                data: {
+                    labels: locationNames,
+                    datasets: [{
+                        label: 'Avg Churn Risk %',
+                        data: locationChurnRisks,
+                        backgroundColor: '#FFC107',
+                        borderColor: '#FF9800',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateAtRiskCustomersTable(atRiskCustomers) {
+            const tbody = document.getElementById('atRiskCustomersBody');
+            tbody.innerHTML = '';
+
+            if (!atRiskCustomers || atRiskCustomers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-success">Tidak ada pelanggan berisiko churn saat ini</td></tr>';
+                return;
+            }
+
+            const riskColors = {
+                'Critical': 'danger',
+                'High': 'warning',
+                'Medium': 'info',
+                'Low': 'secondary'
+            };
+
+            atRiskCustomers.forEach(customer => {
+                const tr = document.createElement('tr');
+                const riskColor = riskColors[customer.risk_category] || 'secondary';
+
+                tr.innerHTML = `
+                    <td>
+                        <strong>${customer.customer_name}</strong><br>
+                        <small class="text-muted">${customer.phone}</small>
+                    </td>
+                    <td class="text-end">
+                        <span class="badge bg-${riskColor === 'danger' ? 'danger' : riskColor === 'warning' ? 'warning' : 'secondary'}">
+                            ${customer.churn_risk.toFixed(1)}%
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-${riskColor}">${customer.risk_category}</span>
+                    </td>
+                    <td>${customer.package}</td>
+                    <td>${customer.location}</td>
+                    <td class="text-end">
+                        <strong>${customer.days_since_payment}</strong> hari
+                    </td>
+                    <td class="text-end">Rp ${(customer.monthly_revenue / 1000).toFixed(0)}K</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function displayRetentionStrategies(strategies) {
+            const container = document.getElementById('retentionStrategiesContainer');
+            container.innerHTML = '';
+
+            if (!strategies || strategies.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">Tidak ada strategi retensi yang diperlukan saat ini.</p>';
+                return;
+            }
+
+            strategies.forEach((strategy, index) => {
+                const priorityColor = {
+                    'Critical': 'danger',
+                    'High': 'warning',
+                    'Medium': 'info'
+                }[strategy.priority] || 'secondary';
+
+                const div = document.createElement('div');
+                div.className = 'mb-3';
+                div.innerHTML = `
+                    <div class="card border-${priorityColor}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0">
+                                    <span class="badge bg-${priorityColor}">${strategy.priority}</span>
+                                    ${strategy.segment}
+                                </h6>
+                            </div>
+                            <p class="card-text mb-2"><strong>Strategi:</strong> ${strategy.strategy}</p>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <small class="text-muted">Revenue Impact:</small><br>
+                                    <strong>Rp ${(strategy.revenue_impact / 1000000).toFixed(1)}M</strong>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">Est. Retention:</small><br>
+                                    <strong>${strategy.estimated_retention}%</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function generateChurnInsights(summary, insights) {
+            const container = document.getElementById('churnInsightsContainer');
+            container.innerHTML = '';
+
+            const insightsList = [];
+
+            // Insight 1: Overall Churn Risk
+            insightsList.push({
+                icon: 'fa-chart-line',
+                color: 'primary',
+                title: 'Overall Churn Risk',
+                text: `Rata-rata churn risk score adalah <strong>${summary.avg_churn_risk_score.toFixed(1)}%</strong> dengan <strong>${summary.critical_risk_count}</strong> customer kritis dan <strong>${summary.high_risk_count}</strong> customer high-risk. Total revenue at risk mencapai <strong>Rp ${(summary.revenue_at_risk / 1000000).toFixed(1)}M</strong>.`
+            });
+
+            // Insight 2: At-Risk Percentage
+            insightsList.push({
+                icon: 'fa-exclamation-circle',
+                color: 'warning',
+                title: 'Persentase Pelanggan Berisiko',
+                text: `<strong>${summary.percentage_at_risk.toFixed(1)}%</strong> dari total pelanggan aktif berada dalam kategori high-risk atau critical. Ini mengindikasikan perlunya aggressive retention campaign.`
+            });
+
+            // Insight 3: Highest Risk Package
+            if (insights.highest_risk_package) {
+                insightsList.push({
+                    icon: 'fa-cube',
+                    color: 'danger',
+                    title: 'Paket Dengan Risk Tertinggi',
+                    text: `Paket <strong>${insights.highest_risk_package}</strong> menunjukkan churn risk tertinggi. Pertimbangkan untuk review value proposition atau customer support untuk paket ini.`
+                });
+            }
+
+            // Insight 4: Highest Risk Location
+            if (insights.highest_risk_location) {
+                insightsList.push({
+                    icon: 'fa-map-marker',
+                    color: 'info',
+                    title: 'Lokasi Dengan Risk Tertinggi',
+                    text: `Lokasi <strong>${insights.highest_risk_location}</strong> memiliki churn risk tertinggi. Analisa root cause dan implementasi targeted intervention untuk area ini.`
+                });
+            }
+
+            // Insight 5: Unpaid Customers
+            insightsList.push({
+                icon: 'fa-calendar-times',
+                color: 'danger',
+                title: 'Pelanggan Belum Bayar',
+                text: `Rata-rata churn risk untuk pelanggan yang belum bayar > 30 hari adalah <strong>${insights.avg_churn_unpaid.toFixed(1)}%</strong>. Immediate payment reminders dan flexibility options sangat penting.`
+            });
+
+            // Insight 6: Recovery Opportunity
+            insightsList.push({
+                icon: 'fa-arrow-up',
+                color: 'success',
+                title: 'Potensi Pemulihan Revenue',
+                text: `Dengan implementasi strategi retensi yang efektif, potential recovery value mencapai <strong>Rp ${(summary.potential_recovery_value / 1000000).toFixed(1)}M</strong>. ROI untuk retention investment bisa mencapai 150-200%.`
+            });
+
+            // Render insights
+            insightsList.forEach(insight => {
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-4';
+                col.innerHTML = `
+                    <div class="card h-100 border-${insight.color} border-2">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle bg-${insight.color} bg-opacity-10 p-3 me-3">
+                                    <i class="fas ${insight.icon} fs-5 text-${insight.color}"></i>
+                                </div>
+                                <h6 class="mb-0">${insight.title}</h6>
+                            </div>
+                            <p class="text-muted mb-0">${insight.text}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(col);
             });
         }
 
