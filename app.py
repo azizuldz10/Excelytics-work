@@ -9,6 +9,14 @@ import shutil
 from werkzeug.utils import secure_filename
 from history_manager import get_history_manager
 
+# Import from new refactored modules
+import config
+from utils import (
+    parse_date_flexible, get_days_since, get_tenure_days,
+    DataValidator, validate_data_quality,
+    read_excel_file as utils_read_excel_file, merge_dataframes, save_data
+)
+
 # Custom JSON provider to handle NaN
 class CustomJSONProvider(DefaultJSONProvider):
     def default(self, obj):
@@ -20,48 +28,23 @@ class CustomJSONProvider(DefaultJSONProvider):
 app = Flask(__name__)
 app.json = CustomJSONProvider(app)
 
-# Helper function to clean data before JSON serialization
-def clean_for_json(data):
-    """Replace NaN, inf, and other problematic values with None"""
-    if isinstance(data, dict):
-        return {k: clean_for_json(v) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [clean_for_json(item) for item in data]
-    elif isinstance(data, float):
-        if np.isnan(data) or np.isinf(data):
-            return None
-        return data
-    elif pd.isna(data):
-        return None
-    return data
+# Use centralized configuration from config.py
+app.config['UPLOAD_FOLDER'] = config.UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = config.MAX_CONTENT_LENGTH
 
-# Upload configuration
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'xls', 'xlsx', 'csv'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-
-# Create upload folder if not exists
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
-# Load data
+# Load data from centralized path
 def load_data():
-    df = pd.read_csv('data-wifi-clean.csv', encoding='utf-8-sig')
+    """Load main data file"""
+    df = pd.read_csv(config.MAIN_DATA_FILE, encoding='utf-8-sig')
     return df
 
-# Clean numeric columns
-def clean_price(price_str):
-    if pd.isna(price_str):
-        return 0
-    try:
-        return int(str(price_str).replace('Rp.', '').replace('.', '').replace(',', '').strip())
-    except:
-        return 0
+# Use DataValidator for price cleaning (alias for backward compatibility)
+clean_price = DataValidator.clean_price
 
 # Helper function to check allowed file
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    """Check if file extension is allowed"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
 
 # Function to merge and clean multiple files
 def merge_and_clean_files(file_paths):
@@ -470,32 +453,10 @@ def create_overview_stats():
         total_monthly_revenue = int(df[df['Status Langganan'] == 'On']['Harga_Clean'].sum())
         avg_revenue_per_customer = int(df[df['Status Langganan'] == 'On']['Harga_Clean'].mean())
 
-        # Data Quality Checks
-        def is_ktp_missing(ktp_url):
-            if pd.isna(ktp_url):
-                return True
-            ktp_str = str(ktp_url).strip()
-            if ktp_str == 'https://e.ebilling.id:2096/img/ktp/' or ktp_str == '' or ktp_str == 'nan':
-                return True
-            if ktp_str.endswith('/') or ktp_str.count('/') <= 4:
-                return True
-            return False
-
-        def is_phone_invalid(phone):
-            if pd.isna(phone):
-                return True
-            phone_str = str(phone).strip()
-            if phone_str == '' or phone_str == 'nan' or len(phone_str) <= 2:
-                return True
-            if phone_str in ['0', '00', '01', '1', '11']:
-                return True
-            digits_only = ''.join(filter(str.isdigit, phone_str))
-            if len(digits_only) < 8:
-                return True
-            return False
-
-        df['Missing_KTP'] = df['Foto KTP'].apply(is_ktp_missing)
-        df['Invalid_Phone'] = df['Tlp'].apply(is_phone_invalid)
+        # Data Quality Checks - use refactored validators
+        validator = DataValidator()
+        df['Missing_KTP'] = df['Foto KTP'].apply(validator.is_ktp_missing)
+        df['Invalid_Phone'] = df['Tlp'].apply(validator.is_phone_invalid)
         df['Incomplete_Data'] = df['Missing_KTP'] | df['Invalid_Phone']
 
         missing_ktp_count = int(df['Missing_KTP'].sum())
@@ -655,67 +616,12 @@ def get_overview():
     total_monthly_revenue = df[df['Status Langganan'] == 'On']['Harga_Clean'].sum()
     avg_revenue_per_customer = df[df['Status Langganan'] == 'On']['Harga_Clean'].mean()
 
-    # Data Quality Checks
-    # Check for missing KTP (foto KTP hanya base URL tanpa filename)
-    def is_ktp_missing(ktp_url):
-        if pd.isna(ktp_url):
-            return True
-        ktp_str = str(ktp_url).strip()
-        # If it's just the base URL or empty after the base URL
-        if ktp_str == 'https://e.ebilling.id:2096/img/ktp/' or ktp_str == '' or ktp_str == 'nan':
-            return True
-        # Check if it ends with just '/' or has no filename
-        if ktp_str.endswith('/') or ktp_str.count('/') <= 4:
-            return True
-        return False
-
-    # Check for invalid phone numbers
-    def is_phone_invalid(phone):
-        if pd.isna(phone):
-            return True
-        phone_str = str(phone).strip()
-        # Check if empty, too short, or anomaly like "01"
-        if phone_str == '' or phone_str == 'nan' or len(phone_str) <= 2:
-            return True
-        # Check if it's just zeros or ones
-        if phone_str in ['0', '00', '01', '1', '11']:
-            return True
-        # Check if phone number is too short (valid Indonesian phone is at least 10 digits)
-        # Remove non-digits for counting
-        digits_only = ''.join(filter(str.isdigit, phone_str))
-        if len(digits_only) < 8:  # Minimum reasonable phone length
-            return True
-        return False
-
-    df['Missing_KTP'] = df['Foto KTP'].apply(is_ktp_missing)
-    df['Invalid_Phone'] = df['Tlp'].apply(is_phone_invalid)
+    # Use refactored data validators instead of duplicating inline logic
+    validator = DataValidator()
+    df['Missing_KTP'] = df['Foto KTP'].apply(validator.is_ktp_missing)
+    df['Invalid_Phone'] = df['Tlp'].apply(validator.is_phone_invalid)
     df['Incomplete_Data'] = df['Missing_KTP'] | df['Invalid_Phone']
-
-    # Check for missing coordinates
-    def is_coordinate_missing(coord):
-        if pd.isna(coord):
-            return True
-        coord_str = str(coord).strip()
-        if coord_str == '' or coord_str == 'nan':
-            return True
-        # Check if it contains comma (valid coordinate format)
-        if ',' not in coord_str:
-            return True
-        # Try to parse
-        try:
-            parts = coord_str.split(',')
-            if len(parts) != 2:
-                return True
-            lat = float(parts[0].strip())
-            lng = float(parts[1].strip())
-            # Basic validation: check if coordinates are reasonable
-            if lat == 0 and lng == 0:
-                return True
-            return False
-        except:
-            return True
-
-    df['Missing_Coordinate'] = df['Titik Koordinat Lokasi'].apply(is_coordinate_missing)
+    df['Missing_Coordinate'] = df['Titik Koordinat Lokasi'].apply(validator.is_coordinate_missing)
 
     # Count data quality issues
     missing_ktp_count = df['Missing_KTP'].sum()
@@ -1003,25 +909,8 @@ def get_filters():
 def registration_analysis():
     df = load_data()
 
-    # Parse dates - support multiple formats
-    def parse_date(date_str):
-        if pd.isna(date_str):
-            return None
-        try:
-            # Try format: YYYY-MM-DD
-            return pd.to_datetime(date_str, format='%Y-%m-%d')
-        except:
-            try:
-                # Try format: DD-Month-YYYY (e.g., 16-October-2025)
-                return pd.to_datetime(date_str, format='%d-%B-%Y')
-            except:
-                try:
-                    # Try pandas auto-parsing
-                    return pd.to_datetime(date_str)
-                except:
-                    return None
-
-    df['Tanggal_Parsed'] = df['Tanggal Registrasi'].apply(parse_date)
+    # Use refactored date parser instead of duplicating logic
+    df['Tanggal_Parsed'] = df['Tanggal Registrasi'].apply(parse_date_flexible)
     df_valid = df[df['Tanggal_Parsed'].notna()].copy()
 
     # Extract date components
@@ -1080,25 +969,8 @@ def psb_check():
     end_date = request.args.get('end_date')  # Format: YYYY-MM-DD
     sales = request.args.get('sales', 'all')
 
-    # Parse dates - support multiple formats
-    def parse_date(date_str):
-        if pd.isna(date_str):
-            return None
-        try:
-            # Try format: YYYY-MM-DD
-            return pd.to_datetime(date_str, format='%Y-%m-%d')
-        except:
-            try:
-                # Try format: DD-Month-YYYY (e.g., 16-October-2025)
-                return pd.to_datetime(date_str, format='%d-%B-%Y')
-            except:
-                try:
-                    # Try pandas auto-parsing
-                    return pd.to_datetime(date_str)
-                except:
-                    return None
-
-    df['Tanggal_Parsed'] = df['Tanggal Registrasi'].apply(parse_date)
+    # Use refactored date parser
+    df['Tanggal_Parsed'] = df['Tanggal Registrasi'].apply(parse_date_flexible)
     df_valid = df[df['Tanggal_Parsed'].notna()].copy()
 
     # Apply date range filter
@@ -1207,25 +1079,8 @@ def blacklist_check():
     min_months = int(request.args.get('min_months', 3))
     sales = request.args.get('sales', 'all')
 
-    # Parse registration dates - support multiple formats
-    def parse_date(date_str):
-        if pd.isna(date_str):
-            return None
-        try:
-            # Try format: YYYY-MM-DD
-            return pd.to_datetime(date_str, format='%Y-%m-%d')
-        except:
-            try:
-                # Try format: DD-Month-YYYY (e.g., 16-October-2025)
-                return pd.to_datetime(date_str, format='%d-%B-%Y')
-            except:
-                try:
-                    # Try pandas auto-parsing
-                    return pd.to_datetime(date_str)
-                except:
-                    return None
-
-    df['Tanggal_Parsed'] = df['Tanggal Registrasi'].apply(parse_date)
+    # Use refactored date parser
+    df['Tanggal_Parsed'] = df['Tanggal Registrasi'].apply(parse_date_flexible)
     df_valid = df[df['Tanggal_Parsed'].notna()].copy()
 
     # Filter: Only customers with "Data Belum Ada" in Pembayaran Terakhir
@@ -1875,24 +1730,13 @@ def customer_segmentation():
         df = load_data()
         today = pd.Timestamp.now()
 
-        # Parse dates with multiple formats
-        def parse_date(date_str):
-            if pd.isna(date_str) or date_str == 'Data Belum Ada':
-                return None
-            try:
-                return pd.to_datetime(date_str, format='%d-%B-%Y')
-            except:
-                try:
-                    return pd.to_datetime(date_str)
-                except:
-                    return None
+        # Use refactored date parser instead of duplicating
+        df['Tanggal_Registrasi_Parsed'] = df['Tanggal Registrasi'].apply(parse_date_flexible)
+        df['Pembayaran_Terakhir_Parsed'] = df['Pembayaran Terakhir'].apply(parse_date_flexible)
 
-        df['Tanggal_Registrasi_Parsed'] = df['Tanggal Registrasi'].apply(parse_date)
-        df['Pembayaran_Terakhir_Parsed'] = df['Pembayaran Terakhir'].apply(parse_date)
-
-        # Calculate metrics
-        df['Tenure_Days'] = (today - df['Tanggal_Registrasi_Parsed']).dt.days
-        df['Days_Since_Payment'] = (today - df['Pembayaran_Terakhir_Parsed']).dt.days
+        # Calculate metrics using refactored utilities
+        df['Tenure_Days'] = df['Tanggal_Registrasi_Parsed'].apply(lambda x: get_tenure_days(x, today) if pd.notna(x) else 0)
+        df['Days_Since_Payment'] = df['Pembayaran_Terakhir_Parsed'].apply(lambda x: get_days_since(x, today) if pd.notna(x) else 999)
         df['Harga_Clean'] = df['Harga'].apply(clean_price)
 
         # RFM Scoring (1-5 scale)
@@ -2171,22 +2015,13 @@ def profitability_analysis():
                                                   reverse=True))
 
         # Profitability by segment (from customer segmentation)
-        def parse_date(date_str):
-            if pd.isna(date_str) or date_str == 'Data Belum Ada':
-                return None
-            try:
-                return pd.to_datetime(date_str, format='%d-%B-%Y')
-            except:
-                try:
-                    return pd.to_datetime(date_str)
-                except:
-                    return None
-
         today = pd.Timestamp.now()
-        df_active['Tanggal_Registrasi_Parsed'] = df_active['Tanggal Registrasi'].apply(parse_date)
-        df_active['Pembayaran_Terakhir_Parsed'] = df_active['Pembayaran Terakhir'].apply(parse_date)
-        df_active['Tenure_Days'] = (today - df_active['Tanggal_Registrasi_Parsed']).dt.days
-        df_active['Days_Since_Payment'] = (today - df_active['Pembayaran_Terakhir_Parsed']).dt.days
+
+        # Use refactored date parser instead of duplicating
+        df_active['Tanggal_Registrasi_Parsed'] = df_active['Tanggal Registrasi'].apply(parse_date_flexible)
+        df_active['Pembayaran_Terakhir_Parsed'] = df_active['Pembayaran Terakhir'].apply(parse_date_flexible)
+        df_active['Tenure_Days'] = df_active['Tanggal_Registrasi_Parsed'].apply(lambda x: get_tenure_days(x, today) if pd.notna(x) else 0)
+        df_active['Days_Since_Payment'] = df_active['Pembayaran_Terakhir_Parsed'].apply(lambda x: get_days_since(x, today) if pd.notna(x) else 999)
 
         # Segment assignment (simplified from customer_segmentation)
         def assign_segment(row):
@@ -2305,25 +2140,14 @@ def churn_analysis():
         df = load_data()
         today = pd.Timestamp.now()
 
-        # Parse dates
-        def parse_date(date_str):
-            if pd.isna(date_str) or date_str == 'Data Belum Ada':
-                return None
-            try:
-                return pd.to_datetime(date_str, format='%d-%B-%Y')
-            except:
-                try:
-                    return pd.to_datetime(date_str)
-                except:
-                    return None
-
-        df['Tanggal_Registrasi_Parsed'] = df['Tanggal Registrasi'].apply(parse_date)
-        df['Pembayaran_Terakhir_Parsed'] = df['Pembayaran Terakhir'].apply(parse_date)
+        # Use refactored date parser instead of duplicating
+        df['Tanggal_Registrasi_Parsed'] = df['Tanggal Registrasi'].apply(parse_date_flexible)
+        df['Pembayaran_Terakhir_Parsed'] = df['Pembayaran Terakhir'].apply(parse_date_flexible)
         df['Harga_Clean'] = df['Harga'].apply(clean_price)
 
-        # Calculate tenure
-        df['Tenure_Days'] = (today - df['Tanggal_Registrasi_Parsed']).dt.days
-        df['Days_Since_Payment'] = (today - df['Pembayaran_Terakhir_Parsed']).dt.days
+        # Calculate tenure using refactored utilities
+        df['Tenure_Days'] = df['Tanggal_Registrasi_Parsed'].apply(lambda x: get_tenure_days(x, today) if pd.notna(x) else 0)
+        df['Days_Since_Payment'] = df['Pembayaran_Terakhir_Parsed'].apply(lambda x: get_days_since(x, today) if pd.notna(x) else 999)
 
         # Churn Risk Scoring (0-100)
         df['Churn_Risk_Score'] = 0.0
