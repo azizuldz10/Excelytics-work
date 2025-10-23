@@ -10,6 +10,8 @@ build/
 server.log
 nul
 data-wifi-clean_backup_*.csv
+data-wifi-clean.csv
+data-wifi.xls
 .DS_Store
 .env
 .venv
