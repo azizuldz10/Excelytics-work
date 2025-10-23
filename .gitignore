@@ -18,3 +18,15 @@ data-wifi.xls
 venv/
 *.log
 .playwright-mcp/
+
+# Development docs (local only)
+DEVELOPMENT_ROADMAP.md
+FEATURE_OVERVIEW.txt
+FEATURE_PRIORITY_GUIDE.md
+FINAL_SUMMARY.md
+HISTORY_IMPLEMENTATION_SUMMARY.md
+HISTORY_TRACKING.md
+NEXT_STEPS_SUMMARY.txt
+PENGEMBANGAN_SELANJUTNYA.md
+QUICK_START_HISTORY.md
+revenue_analytics_section.html

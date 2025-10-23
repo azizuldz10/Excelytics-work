@@ -1,176 +1,305 @@
-# Dashboard Analytics WiFi
+# 📊 Excelytics - WiFi Analytics Dashboard
 
-Dashboard web interaktif untuk menganalisis data pelanggan WiFi dengan visualisasi lengkap.
+> Solusi analytics terintegrasi untuk manajemen dan analisis data pelanggan WiFi dengan visualisasi real-time yang powerful.
 
-## Fitur Dashboard
+![Python](https://img.shields.io/badge/Python-3.9+-blue?style=flat-square)
+![Flask](https://img.shields.io/badge/Flask-2.0+-green?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-orange?style=flat-square)
 
-### 1. Overview Dashboard
-- Total pelanggan dan statistik status (aktif/nonaktif)
-- Pendapatan bulanan total dan rata-rata per pelanggan
-- **Data Quality Alert (NEW!)** - Deteksi otomatis data tidak lengkap:
-  - Pelanggan tanpa foto KTP (URL hanya base path)
-  - Pelanggan dengan no HP tidak valid (null, "01", atau < 8 digit)
-  - Modal detail list pelanggan bermasalah
-  - Export data tidak lengkap ke CSV
-- Distribusi paket langganan
-- Analisis lokasi dan router
-- Grafik status pelanggan
+---
 
-### 2. Analisis Pendapatan
-- Pendapatan per paket langganan
-- Distribusi range harga
-- Top lokasi berdasarkan pendapatan
-- Total revenue analysis
+## ✨ Fitur Utama
 
-### 3. Data Pelanggan
-- Tabel data pelanggan yang dapat difilter
-- Filter berdasarkan: Status, Paket, Lokasi, Sales
-- Export data ke CSV
-- Menampilkan hingga 100 data pelanggan
+### 📈 Overview Dashboard
+- **Statistik Real-time**: Total pelanggan, revenue, status langganan
+- **Data Quality Alert**: Deteksi otomatis data tidak lengkap
+  - Pelanggan tanpa dokumentasi KTP
+  - Nomor telepon tidak valid
+  - Koordinat geografis kosong
+- **Distribusi Paket**: Visualisasi paket langganan populer
+- **Analisis Lokasi**: Performance per lokasi jaringan
 
-### 4. Peta Lokasi
-- Visualisasi geografis pelanggan dengan koordinat
-- Marker berwarna (hijau = aktif, merah = nonaktif)
-- Info popup untuk setiap pelanggan
+### 💰 Revenue Analytics
+- Breakdown pendapatan per paket langganan
+- Analisis range harga dan distribusi
+- Top locations by revenue
+- Revenue trends & forecasting
 
-### 5. Performa Sales
-- Analisis performa setiap sales
-- Jumlah pelanggan per sales
-- Total pendapatan per sales
-- Top 10 sales terbaik
+### 👥 Customer Management
+- Tabel pelanggan interaktif dengan real-time filtering
+- Multi-parameter filters (Status, Paket, Lokasi, Sales)
+- Export data ke CSV format
+- Pagination & responsive table design
 
-### 6. Analisis Registrasi
-- **Analisis periode 20-30 September 2025**
-- **Pola registrasi per hari dalam seminggu** (Insight: 69% registrasi di hari Jumat!)
-- **Perbandingan September vs Oktober 2025**
-- **Top 10 bulan dengan registrasi terbanyak**
-- **Paket terpopuler per periode**
-- **Tren registrasi harian dan bulanan**
+### 🗺️ Geo Mapping
+- Visualisasi geografis dengan koordinat real-time
+- Interactive markers dengan color coding
+  - 🟢 **Hijau**: Pelanggan aktif
+  - 🔴 **Merah**: Pelanggan nonaktif
+- Info popup detail untuk setiap lokasi
 
-### 7. Cek PSB - Pemasangan Sambungan Baru (NEW!)
-- **Date range picker** - Pilih rentang tanggal custom
-- **Quick select buttons** - Pilih cepat: 20-30 Sept, September Penuh, Oktober, Bulan Ini, 7 Hari Terakhir
-- **Filter per sales** - Lihat PSB per sales atau semua sales
-- **Summary cards** - Total PSB, Potensi Revenue, Jumlah Sales, Rata-rata per hari
-- **Breakdown per sales** - Progress bar & detail revenue per sales
-- **Chart paket terpopuler** - Visualisasi paket yang paling banyak dipasang
-- **Tabel detail pelanggan** - Semua pelanggan yang pasang di periode tersebut
-- **Export to CSV** - Download data PSB untuk periode yang dipilih
+### 📊 Sales Performance
+- Metrik performa per sales agent
+- Customer acquisition tracking
+- Revenue contribution analysis
+- Top performers leaderboard
 
-**Use Case:**
-Fitur ini sangat berguna untuk tracking pemasangan yang sudah di-close fiktif tapi belum bayaran.
-Contoh: Cek berapa pelanggan yang pasang oleh Sales CEPI di tanggal 20-30 September.
+### 📅 Registration Analytics
+- Trend analisis registrasi per periode
+- Day-of-week pattern analysis
+- Monthly comparison & seasonality
+- Popular packages by period
 
-**Contoh Hasil:**
-- **20-30 Sept 2025**: 15 PSB (CEPI: 9, ENONGS: 6) - Potensi Rp 2,420,000
-- **September Penuh**: 59 PSB (CEPI: 37, ENONGS: 22) - Potensi Rp 8,910,000
-- **Oktober Penuh**: 27 PSB (CEPI: 18, ENONGS: 9) - Potensi Rp 4,110,000
+### 🔧 PSB Tracking (Pemasangan Sambungan Baru)
+- **Date Range Picker**: Custom rentang tanggal analisis
+- **Quick Filters**: Pre-built date ranges (minggu lalu, bulan ini, dll)
+- **Per-Agent Breakdown**: Revenue dan volume per sales
+- **Summary Cards**: Overview metrics
+- **Package Distribution**: Paket populer chart
+- **Detailed Export**: Download ke CSV untuk follow-up
 
-## Cara Menjalankan
+**Use Case**: Track pemasangan yang sudah closed tapi belum pembayaran diterima.
 
-### Persiapan
-1. Pastikan file `data-wifi.xls` ada di folder yang sama
-2. Pastikan Python 3.9+ sudah terinstall
-3. Install dependencies yang dibutuhkan (sudah dilakukan)
+### 📋 SOP Validation & Monitoring
+- Aturan SOP customizable per sales agent
+- Automatic compliance checking
+- Violation alerts & severity levels
+- Historical tracking & trend analysis
 
-### Menjalankan Dashboard
+### 🔐 Data Governance
+- Automatic backup sebelum data update
+- Change history tracking (NEW!)
+- Snapshot management & comparison
+- Data integrity validation
 
-**Windows:**
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.9+
+- pip package manager
+
+### Installation & Setup
+
+1. **Clone Repository**
 ```bash
-python app.py
+git clone https://github.com/azizuldz10/Excelytics-work.git
+cd Excelytics-work
 ```
 
-**Atau gunakan script:**
+2. **Install Dependencies**
 ```bash
+pip install -r requirements.txt
+```
+
+3. **Prepare Data**
+- Letakkan file `data-wifi.xls` di root folder
+- Atau upload melalui web interface
+
+4. **Run Dashboard**
+```bash
+# Windows
+python app.py
+
+# Atau gunakan script
 start_dashboard.bat
 ```
 
-Dashboard akan berjalan di: **http://localhost:5000**
+5. **Access Dashboard**
+```
+http://localhost:5000
+```
 
-### Akses Dashboard
-1. Buka browser (Chrome, Firefox, Edge)
-2. Kunjungi: http://localhost:5000
-3. Dashboard akan langsung menampilkan data overview
+---
 
-## Struktur File
+## 📁 Project Structure
 
 ```
-CSV_REPORT/
-├── data-wifi.xls              # File data asli (HTML table)
-├── data-wifi-clean.csv        # File data yang sudah diparse
-├── app.py                     # Backend Flask application
-├── parse_html_data.py         # Script parsing HTML ke CSV
-├── analyze_data.py            # Script analisis data
-├── start_dashboard.bat        # Script untuk start dashboard
+excelytics-work/
+├── app.py                      # Flask backend & API endpoints
+├── parse_html_data.py          # HTML to CSV parser
+├── history_manager.py          # Database & history tracking
+├── sop_rules.json              # SOP configuration
+├── start_dashboard.bat         # Windows startup script
+│
 ├── templates/
-│   └── dashboard.html         # Frontend dashboard
-└── README.md                  # Dokumentasi ini
+│   └── dashboard.html          # Single-page frontend app
+│
+└── README.md                   # Dokumentasi project
 ```
 
-## Teknologi yang Digunakan
+---
+
+## 📊 API Reference
+
+### Data Management
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/upload` | POST | Upload & merge Excel/CSV files |
+| `/api/overview` | GET | Dashboard overview stats |
+| `/api/customers` | GET | Customer list with filters |
+| `/api/filters` | GET | Available filter options |
+
+### Analytics
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/revenue-analysis` | GET | Revenue breakdown analytics |
+| `/api/registration-analysis` | GET | Registration trends |
+| `/api/psb-check` | GET | PSB tracking & analysis |
+| `/api/map-data` | GET | Geo coordinates for mapping |
+
+### Management
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/sop-rules` | GET/POST/PUT/DELETE | SOP rule management |
+| `/api/violations` | GET | SOP violation tracking |
+| `/api/history` | GET | Historical snapshots |
+| `/api/history/<date>` | GET | Specific date snapshot |
+
+---
+
+## 🛠️ Tech Stack
 
 ### Backend
-- **Flask** - Web framework Python
-- **Pandas** - Data analysis dan processing
+- **Flask** - Lightweight web framework
+- **Pandas** - Data analysis & manipulation
+- **SQLite** - History persistence
 - **BeautifulSoup4** - HTML parsing
 
 ### Frontend
-- **Bootstrap 5** - UI framework
-- **Chart.js** - Visualisasi grafik interaktif
-- **Leaflet.js** - Peta interaktif
-- **Font Awesome** - Icons
+- **Bootstrap 5** - Responsive UI framework
+- **Chart.js** - Interactive charts & graphs
+- **Leaflet.js** - OpenStreetMap integration
+- **Font Awesome** - Icon library
 
-## Statistik Data
+---
 
-Berdasarkan data saat ini:
-- **Total Pelanggan:** 1,169 pelanggan
-- **Pelanggan Aktif:** 1,090 (93.24%)
-- **Pelanggan Nonaktif:** 79 (6.76%)
-- **Paket Terpopuler:** H-MEKAR PRIME (767 pelanggan)
+## 📈 Current Statistics
 
-### Data Quality Status
-- **Pelanggan tanpa Foto KTP:** 443 pelanggan
-- **Pelanggan dengan No HP Invalid:** 3 pelanggan
-- **Total Data Tidak Lengkap:** 445 pelanggan aktif (40.8%)
+| Metric | Value |
+|--------|-------|
+| Total Customers | 1,169 |
+| Active Rate | 93.24% |
+| Top Package | H-MEKAR PRIME |
+| Data Quality | 59.2% Complete |
 
-## Fitur Tambahan
+---
 
-### Export Data
-Anda dapat mengekspor data pelanggan yang sudah difilter ke format CSV melalui tombol "Export CSV" di halaman Data Pelanggan.
+## 🔒 Data Security & Privacy
 
-### Filter Interaktif
-Dashboard mendukung filter multi-parameter:
-- Status: Aktif/Nonaktif
-- Paket Langganan: Semua paket yang tersedia
-- Lokasi: Semua lokasi pelanggan
-- Sales: Semua nama sales
+- ✅ Automatic backup sebelum setiap update
+- ✅ Change history dengan timestamp
+- ✅ Customer data tidak tersimpan di repository
+- ✅ SOP validation untuk compliance
+- ✅ Role-based access planning (roadmap)
 
-### Responsive Design
-Dashboard dapat diakses melalui desktop, tablet, dan mobile dengan tampilan yang menyesuaikan.
+---
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Dashboard tidak bisa diakses
-- Pastikan Python app.py sudah berjalan
-- Check port 5000 tidak digunakan aplikasi lain
-- Coba akses http://127.0.0.1:5000
+```bash
+# Pastikan Flask server berjalan
+python app.py
+
+# Check port 5000 tersedia
+netstat -ano | findstr :5000
+
+# Coba dengan explicit host
+# http://127.0.0.1:5000
+```
 
 ### Data tidak muncul
-- Pastikan file data-wifi-clean.csv sudah ada
-- Jalankan ulang parse_html_data.py jika perlu
-- Check console browser untuk error (F12)
+```bash
+# Pastikan file data ada
+dir data-wifi*.csv
+
+# Re-parse jika perlu
+python parse_html_data.py
+
+# Check console (F12) untuk errors
+```
 
 ### Peta tidak muncul
-- Pastikan koneksi internet aktif (untuk load map tiles)
-- Check apakah ada koordinat valid di data
+- Pastikan koneksi internet aktif
+- Verifikasi ada koordinat valid di data
+- Check Leaflet.js CDN accessible
 
-## Update Data
+---
 
-Untuk update data pelanggan:
-1. Upload file `data-wifi.xls` yang baru
-2. Jalankan: `python parse_html_data.py`
-3. Refresh browser atau restart aplikasi
+## 📝 Data Format
 
-## Support & Contact
+### Required Columns (CSV/XLS)
+```
+ID Pelanggan (unique identifier)
+Nama Pelanggan
+No Telepon
+Alamat
+Nama Paket Langganan
+Harga Paket
+Status Langganan (On/Off)
+Tanggal Registrasi (YYYY-MM-DD)
+Jatuh Tempo
+Sales Agent (anonymized in reports)
+Insentif Sales
+Nama Lokasi
+Nama Router
+Jenis Koneksi
+Titik Koordinat Lokasi (lat,lng format)
+Foto KTP (URL)
+Pembayaran Terakhir
+```
 
-Untuk pertanyaan atau bantuan, hubungi administrator sistem.
+---
+
+## 🔄 Data Update Workflow
+
+1. **Upload** → Kirim file Excel/CSV terbaru via web interface
+2. **Validation** → Sistem cek format & data quality
+3. **Backup** → Auto-backup versi sebelumnya
+4. **Process** → Deduplicate & clean data
+5. **Snapshot** → Save historical record
+6. **Visualize** → Dashboard update real-time
+
+---
+
+## 🚧 Roadmap
+
+- [ ] Multi-user support dengan authentication
+- [ ] Role-based access control (Admin, Manager, Agent)
+- [ ] Advanced predictive analytics
+- [ ] WhatsApp integration untuk alerts
+- [ ] Mobile app native
+- [ ] Real-time collaboration features
+
+---
+
+## 💡 Best Practices
+
+1. **Regular Backups**: Upload data secara berkala untuk tracking trends
+2. **Data Validation**: Cek data quality alerts sebelum analysis
+3. **SOP Compliance**: Review violations secara rutin
+4. **History Tracking**: Gunakan snapshot compare untuk identify issues
+5. **Export Reports**: Download custom reports untuk stakeholder meetings
+
+---
+
+## 📞 Support & Feedback
+
+Untuk pertanyaan, bugs, atau feature requests:
+- 📧 Email: [contact info]
+- 🐛 Issues: [GitHub issues]
+- 💬 Discussion: [GitHub discussions]
+
+---
+
+## 📄 License
+
+MIT License - Bebas untuk digunakan dan dimodifikasi dengan proper attribution.
+
+---
+
+**Made with ❤️ for better WiFi analytics**
+
+Last Updated: October 2025
