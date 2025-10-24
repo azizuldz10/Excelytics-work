@@ -52,6 +52,50 @@
             color: var(--primary-color);
         }
 
+        /* Dropdown Toggle Styling */
+        .sidebar .dropdown-toggle {
+            color: #5a5c69 !important;
+            font-weight: 500;
+        }
+
+        .sidebar .dropdown-toggle:hover {
+            background: #f8f9fc;
+            border-left-color: var(--primary-color);
+            color: var(--primary-color) !important;
+        }
+
+        .sidebar .dropdown-toggle[aria-expanded="true"] {
+            background: #f8f9fc;
+            border-left-color: var(--primary-color);
+            color: var(--primary-color) !important;
+        }
+
+        .sidebar .dropdown-toggle[aria-expanded="true"] i.fa-chevron-down {
+            transform: rotate(180deg);
+            transition: transform 0.3s;
+        }
+
+        /* Submenu Styling */
+        .sidebar .collapse .nav-link {
+            padding-left: 40px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            font-size: 0.95rem;
+            color: #858796 !important;
+        }
+
+        .sidebar .collapse .nav-link:hover,
+        .sidebar .collapse .nav-link.active {
+            background: rgba(78, 115, 223, 0.05);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color) !important;
+        }
+
+        /* Group separator */
+        .sidebar .nav-item + .nav-item:has(.dropdown-toggle) {
+            margin-top: 8px;
+        }
+
         .main-content {
             margin-left: 250px;
             padding: 20px;
@@ -191,8 +235,9 @@
         <!-- Sidebar -->
         <div class="sidebar d-none d-md-block">
             <div class="p-3">
-                <h6 class="text-muted text-uppercase mb-3">Menu Navigasi</h6>
+                <h6 class="text-muted text-uppercase mb-3 px-2">Menu Navigasi</h6>
                 <ul class="nav flex-column">
+                    <!-- Core Menu -->
                     <li class="nav-item">
                         <a class="nav-link active" href="#overview" onclick="showSection('overview')">
                             <i class="fas fa-tachometer-alt me-2"></i>
@@ -205,71 +250,135 @@
                             Upload Data
                         </a>
                     </li>
+
+                    <!-- Analytics Group -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#revenue" onclick="showSection('revenue')">
-                            <i class="fas fa-chart-bar me-2"></i>
-                            Analisis Revenue
+                        <a class="nav-link dropdown-toggle d-flex justify-content-between align-items-center"
+                           href="#" data-bs-toggle="collapse" data-bs-target="#analyticsMenu" aria-expanded="false">
+                            <span>
+                                <i class="fas fa-chart-pie me-2"></i>
+                                Analytics
+                            </span>
+                            <i class="fas fa-chevron-down fa-xs ms-auto"></i>
                         </a>
+                        <div class="collapse" id="analyticsMenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#revenue" onclick="showSection('revenue')">
+                                        <i class="fas fa-chart-bar me-2"></i>
+                                        Revenue Analysis
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#registration" onclick="showSection('registration')">
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        Registrasi Trend
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#profitability" onclick="showSection('profitability')">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Profitabilitas
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
+
+                    <!-- Customer Group -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#segmentation" onclick="showSection('segmentation')">
-                            <i class="fas fa-layer-group me-2"></i>
-                            Segmentasi Pelanggan
+                        <a class="nav-link dropdown-toggle d-flex justify-content-between align-items-center"
+                           href="#" data-bs-toggle="collapse" data-bs-target="#customerMenu" aria-expanded="false">
+                            <span>
+                                <i class="fas fa-users me-2"></i>
+                                Pelanggan
+                            </span>
+                            <i class="fas fa-chevron-down fa-xs ms-auto"></i>
                         </a>
+                        <div class="collapse" id="customerMenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#customers" onclick="showSection('customers')">
+                                        <i class="fas fa-list me-2"></i>
+                                        Data Pelanggan
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#segmentation" onclick="showSection('segmentation')">
+                                        <i class="fas fa-layer-group me-2"></i>
+                                        Segmentasi (RFM)
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#map" onclick="showSection('map-view')">
+                                        <i class="fas fa-map-marked-alt me-2"></i>
+                                        Peta Lokasi
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
+
+                    <!-- Risk Management Group -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#profitability" onclick="showSection('profitability')">
-                            <i class="fas fa-chart-line me-2"></i>
-                            Analisis Profitabilitas
+                        <a class="nav-link dropdown-toggle d-flex justify-content-between align-items-center"
+                           href="#" data-bs-toggle="collapse" data-bs-target="#riskMenu" aria-expanded="false">
+                            <span>
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Risk Management
+                            </span>
+                            <i class="fas fa-chevron-down fa-xs ms-auto"></i>
                         </a>
+                        <div class="collapse" id="riskMenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#churn" onclick="showSection('churn')">
+                                        <i class="fas fa-user-slash me-2"></i>
+                                        Churn & Retensi
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#blacklist" onclick="showSection('blacklist')">
+                                        <i class="fas fa-ban me-2"></i>
+                                        Blacklist
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#psb" onclick="showSection('psb')">
+                                        <i class="fas fa-calendar-check me-2"></i>
+                                        PSB Tracking
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
+
+                    <!-- Management Group -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#churn" onclick="showSection('churn')">
-                            <i class="fas fa-user-slash me-2"></i>
-                            Analisis Churn & Retensi
+                        <a class="nav-link dropdown-toggle d-flex justify-content-between align-items-center"
+                           href="#" data-bs-toggle="collapse" data-bs-target="#mgmtMenu" aria-expanded="false">
+                            <span>
+                                <i class="fas fa-cogs me-2"></i>
+                                Management
+                            </span>
+                            <i class="fas fa-chevron-down fa-xs ms-auto"></i>
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#customers" onclick="showSection('customers')">
-                            <i class="fas fa-users me-2"></i>
-                            Data Pelanggan
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#map" onclick="showSection('map-view')">
-                            <i class="fas fa-map-marked-alt me-2"></i>
-                            Peta Lokasi
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#registration" onclick="showSection('registration')">
-                            <i class="fas fa-calendar-alt me-2"></i>
-                            Analisis Registrasi
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#psb" onclick="showSection('psb')">
-                            <i class="fas fa-calendar-check me-2"></i>
-                            Cek PSB
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#blacklist" onclick="showSection('blacklist')">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            Blacklist / Penarikan
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#sop-rules" onclick="showSection('sop-rules')">
-                            <i class="fas fa-clipboard-list me-2"></i>
-                            Manage SOP Rules
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#history" onclick="showSection('history')">
-                            <i class="fas fa-history me-2"></i>
-                            History & Tracking
-                        </a>
+                        <div class="collapse" id="mgmtMenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#sop-rules" onclick="showSection('sop-rules')">
+                                        <i class="fas fa-clipboard-check me-2"></i>
+                                        SOP Rules
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#history" onclick="showSection('history')">
+                                        <i class="fas fa-history me-2"></i>
+                                        History & Tracking
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -2414,7 +2523,7 @@
                 el.style.display = 'none';
             });
 
-            // Remove active class from all nav links
+            // Remove active class from all nav links (including dropdowns)
             document.querySelectorAll('.sidebar .nav-link').forEach(el => {
                 el.classList.remove('active');
             });
@@ -2423,7 +2532,18 @@
             document.getElementById(section + '-section').style.display = 'block';
 
             // Add active class to clicked nav link
-            event.target.closest('.nav-link').classList.add('active');
+            const clickedLink = event.target.closest('.nav-link');
+            clickedLink.classList.add('active');
+
+            // If the link is inside a dropdown, expand the dropdown
+            const parentCollapse = clickedLink.closest('.collapse');
+            if (parentCollapse) {
+                const collapseId = parentCollapse.id;
+                const dropdownToggle = document.querySelector(`[data-bs-target="#${collapseId}"]`);
+                if (dropdownToggle && !dropdownToggle.getAttribute('aria-expanded') || dropdownToggle.getAttribute('aria-expanded') === 'false') {
+                    const bsCollapse = new bootstrap.Collapse(parentCollapse, { toggle: true });
+                }
+            }
 
             // Load section-specific data
             if (section === 'customers') {

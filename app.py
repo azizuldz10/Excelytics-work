@@ -46,6 +46,21 @@ def allowed_file(filename):
     """Check if file extension is allowed"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
 
+# Helper function to clean data before JSON serialization
+def clean_for_json(data):
+    """Replace NaN, inf, and other problematic values with None"""
+    if isinstance(data, dict):
+        return {k: clean_for_json(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [clean_for_json(item) for item in data]
+    elif isinstance(data, float):
+        if np.isnan(data) or np.isinf(data):
+            return None
+        return data
+    elif pd.isna(data):
+        return None
+    return data
+
 # Function to merge and clean multiple files
 def merge_and_clean_files(file_paths):
     """
@@ -61,7 +76,7 @@ def merge_and_clean_files(file_paths):
         # Read each file
         for idx, file_path in enumerate(file_paths, 1):
             print(f"\n--- Processing File {idx}: {file_path} ---")
-            success, df_or_message, file_ext = read_excel_file(file_path)
+            success, df_or_message, file_ext = utils_read_excel_file(file_path)
 
             if not success:
                 return False, f"Error reading file {idx}: {df_or_message}", None
