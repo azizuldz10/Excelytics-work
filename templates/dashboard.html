@@ -6,6 +6,8 @@
     <title>Dashboard Analytics WiFi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -17,11 +19,83 @@
             --danger-color: #e74a3b;
             --warning-color: #f6c23e;
             --info-color: #36b9cc;
+            --light-bg: #f8f9fc;
+            --dark-bg: #1a1a1a;
+            --dark-card: #2d2d2d;
+            --dark-text: #e0e0e0;
+            --dark-text-secondary: #a0a0a0;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f8f9fc;
+            background: var(--light-bg);
+            color: #333;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        body.dark-mode .sidebar {
+            background: var(--dark-card);
+            color: var(--dark-text);
+            border-right: 1px solid #444;
+        }
+
+        body.dark-mode .nav-link {
+            color: var(--dark-text-secondary) !important;
+        }
+
+        body.dark-mode .nav-link:hover,
+        body.dark-mode .nav-link.active {
+            color: var(--primary-color) !important;
+            background: rgba(78, 115, 223, 0.1);
+        }
+
+        body.dark-mode .card,
+        body.dark-mode .filter-section,
+        body.dark-mode .table-container {
+            background: var(--dark-card);
+            border-color: #444;
+            color: var(--dark-text);
+        }
+
+        body.dark-mode .table {
+            color: var(--dark-text);
+        }
+
+        body.dark-mode .table thead {
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid #444;
+        }
+
+        body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        body.dark-mode .form-control,
+        body.dark-mode .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #444;
+            color: var(--dark-text);
+        }
+
+        body.dark-mode .form-control:focus,
+        body.dark-mode .form-select:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary-color);
+            color: var(--dark-text);
+        }
+
+        body.dark-mode .text-muted {
+            color: var(--dark-text-secondary) !important;
+        }
+
+        body.dark-mode #map {
+            filter: invert(0.93) hue-rotate(200deg);
         }
 
         .navbar {
@@ -214,6 +288,84 @@
             opacity: 1;
             color: var(--primary-color);
         }
+
+        /* Loading Skeleton Animation */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        body.dark-mode .skeleton {
+            background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-text {
+            height: 16px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+
+        .skeleton-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .skeleton-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        body.dark-mode .skeleton-card {
+            background: var(--dark-card);
+        }
+
+        .skeleton-card .skeleton-text:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Search Box Styling */
+        .search-box input {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-box input:focus {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+
+        /* Main Content Area Visibility */
+        .main-content {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -224,10 +376,20 @@
                 <i class="fas fa-wifi me-2"></i>
                 Dashboard Analytics WiFi
             </a>
-            <span class="text-white">
-                <i class="fas fa-user-circle me-2"></i>
-                Admin
-            </span>
+            <div class="d-flex align-items-center gap-3">
+                <div class="search-box" style="position: relative;">
+                    <input type="text" class="form-control form-control-sm" id="globalSearch"
+                           placeholder="Search..." style="width: 200px; padding-right: 30px;">
+                    <i class="fas fa-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #999; pointer-events: none;"></i>
+                </div>
+                <button class="btn btn-link text-white" id="darkModeToggle" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <span class="text-white">
+                    <i class="fas fa-user-circle me-2"></i>
+                    Admin
+                </span>
+            </div>
         </div>
     </nav>
 
@@ -566,7 +728,7 @@
             </div>
 
             <!-- Upload Data Section -->
-            <div id="upload-section" class="content-section" style="display: none;">
+            <div id="upload-section" class="content-section">
                 <h2 class="mb-4">Upload Data Excel</h2>
 
                 <!-- Info Alert -->
@@ -592,7 +754,7 @@
                                     Format: .xls, .xlsx, atau .csv | Maksimal 16MB per file |
                                     <strong>Bisa pilih 2 atau lebih file sekaligus!</strong>
                                 </div>
-                                <div id="fileList" class="mt-2" style="display: none;">
+                                <div id="fileList" class="mt-2">
                                     <small class="text-muted">File yang dipilih:</small>
                                     <ul id="fileListItems" class="list-unstyled mt-1"></ul>
                                 </div>
@@ -606,7 +768,7 @@
                         </form>
 
                         <!-- Progress Bar -->
-                        <div id="uploadProgress" class="mt-3" style="display: none;">
+                        <div id="uploadProgress" class="mt-3">
                             <div class="progress" style="height: 25px;">
                                 <div class="progress-bar progress-bar-striped progress-bar-animated"
                                      role="progressbar" style="width: 100%">
@@ -616,10 +778,10 @@
                         </div>
 
                         <!-- Result Alert -->
-                        <div id="uploadResult" class="mt-3" style="display: none;"></div>
+                        <div id="uploadResult" class="mt-3"></div>
 
                         <!-- Stats Card -->
-                        <div id="uploadStats" class="mt-4" style="display: none;">
+                        <div id="uploadStats" class="mt-4">
                             <div class="card bg-light">
                                 <div class="card-header">
                                     <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Hasil Cleaning</h6>
@@ -676,7 +838,7 @@
             </div>
 
             <!-- Revenue Analytics Section -->
-            <div id="revenue-section" class="content-section" style="display: none;">
+            <div id="revenue-section" class="content-section">
                 <h2 class="mb-4">
                     <i class="fas fa-chart-bar me-2"></i>Analisis Revenue Dashboard
                 </h2>
@@ -879,7 +1041,7 @@
             </div>
 
             <!-- Customer Segmentation Section -->
-            <div id="segmentation-section" class="content-section" style="display: none;">
+            <div id="segmentation-section" class="content-section">
                 <h2 class="mb-4">
                     <i class="fas fa-layer-group me-2"></i>Segmentasi Pelanggan (RFM Analysis)
                 </h2>
@@ -1045,7 +1207,7 @@
             </div>
 
             <!-- Profitability Analysis Section -->
-            <div id="profitability-section" class="content-section" style="display: none;">
+            <div id="profitability-section" class="content-section">
                 <h2 class="mb-4">
                     <i class="fas fa-chart-line me-2"></i>Analisis Profitabilitas
                 </h2>
@@ -1272,7 +1434,7 @@
             </div>
 
             <!-- Churn Analysis Section -->
-            <div id="churn-section" class="content-section" style="display: none;">
+            <div id="churn-section" class="content-section">
                 <h2 class="mb-4">
                     <i class="fas fa-user-slash me-2"></i>Analisis Churn & Retensi
                 </h2>
@@ -1472,7 +1634,7 @@
             </div>
 
             <!-- Customers Section -->
-            <div id="customers-section" class="content-section" style="display: none;">
+            <div id="customers-section" class="content-section">
                 <h2 class="mb-4">Data Pelanggan</h2>
 
                 <div class="filter-section">
@@ -1543,7 +1705,7 @@
             </div>
 
             <!-- Map Section -->
-            <div id="map-view-section" class="content-section" style="display: none;">
+            <div id="map-view-section" class="content-section">
                 <h2 class="mb-4">Peta Lokasi Pelanggan</h2>
                 <div class="card">
                     <div class="card-body">
@@ -1553,7 +1715,7 @@
             </div>
 
             <!-- Sales Section -->
-            <div id="sales-section" class="content-section" style="display: none;">
+            <div id="sales-section" class="content-section">
                 <h2 class="mb-4">Performa Sales</h2>
 
                 <div class="row g-4">
@@ -1584,7 +1746,7 @@
             </div>
 
             <!-- Registration Analysis Section -->
-            <div id="registration-section" class="content-section" style="display: none;">
+            <div id="registration-section" class="content-section">
                 <h2 class="mb-4">Analisis Registrasi Pelanggan</h2>
 
                 <!-- Summary Cards -->
@@ -1681,7 +1843,7 @@
             </div>
 
             <!-- PSB Check Section -->
-            <div id="psb-section" class="content-section" style="display: none;">
+            <div id="psb-section" class="content-section">
                 <h2 class="mb-4">Cek PSB (Pemasangan Sambungan Baru)</h2>
 
                 <!-- Filter Section -->
@@ -1872,7 +2034,7 @@
             </div>
 
             <!-- Blacklist / Penarikan Alat Section -->
-            <div id="blacklist-section" class="content-section" style="display: none;">
+            <div id="blacklist-section" class="content-section">
                 <h2 class="mb-4">Blacklist - Penarikan Alat WiFi</h2>
 
                 <!-- Alert Info -->
@@ -2023,7 +2185,7 @@
             </div>
 
             <!-- SOP Rules Management Section -->
-            <div id="sop-rules-section" class="content-section" style="display: none;">
+            <div id="sop-rules-section" class="content-section">
                 <h2 class="mb-4">Manage SOP Rules</h2>
 
                 <!-- Info Alert -->
@@ -2034,7 +2196,7 @@
                 </div>
 
                 <!-- SOP Violations Alert (for SOP Rules Page) -->
-                <div class="row g-4 mb-4" id="sop-violations-container-rules" style="display: none;">
+                <div class="row g-4 mb-4" id="sop-violations-container-rules">
                     <div class="col-12">
                         <div class="card border-start border-warning border-4">
                             <div class="card-header bg-white">
@@ -2129,7 +2291,7 @@
             </div>
 
             <!-- History & Tracking Section -->
-            <div id="history-section" class="content-section" style="display: none;">
+            <div id="history-section" class="content-section">
                 <h2 class="mb-4">
                     <i class="fas fa-history me-2"></i>History & Tracking Data
                 </h2>
@@ -2235,7 +2397,7 @@
                 </div>
 
                 <!-- Comparison Results -->
-                <div class="row g-4 mb-4" id="comparison-results" style="display: none;">
+                <div class="row g-4 mb-4" id="comparison-results">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header bg-light">
@@ -2500,6 +2662,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         let overviewData = null;
         let revenueData = null;
@@ -2508,8 +2671,162 @@
         let violationsData = null;
         let map = null;
 
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 3000) {
+            const bgColor = {
+                'success': '#1cc88a',
+                'error': '#e74a3b',
+                'warning': '#f6c23e',
+                'info': '#4e73df'
+            }[type] || '#4e73df';
+
+            const icon = {
+                'success': 'check-circle',
+                'error': 'exclamation-circle',
+                'warning': 'exclamation-triangle',
+                'info': 'info-circle'
+            }[type] || 'info-circle';
+
+            Toastify({
+                text: `<i class="fas fa-${icon} me-2"></i>${message}`,
+                duration: duration,
+                gravity: "top",
+                position: "right",
+                backgroundColor: bgColor,
+                stopOnFocus: true,
+                escapeMarkup: false
+            }).showToast();
+        }
+
+        function showSuccess(message) { showToast(message, 'success'); }
+        function showError(message) { showToast(message, 'error', 4000); }
+        function showWarning(message) { showToast(message, 'warning'); }
+        function showInfo(message) { showToast(message, 'info'); }
+
+        // Skeleton Loading Helper
+        function createSkeletonCard(lines = 3) {
+            let skeleton = '<div class="skeleton-card">';
+            for (let i = 0; i < lines; i++) {
+                const width = i === lines - 1 ? '60%' : '100%';
+                skeleton += `<div class="skeleton skeleton-text" style="width: ${width};"></div>`;
+            }
+            skeleton += '</div>';
+            return skeleton;
+        }
+
+        function showLoadingSkeleton(elementId, cardCount = 3) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            let html = '';
+            for (let i = 0; i < cardCount; i++) {
+                html += createSkeletonCard(2);
+            }
+            element.innerHTML = html;
+        }
+
+        // Table Sorting Helper
+        function initTableSorting(tableId) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+
+            const headers = table.querySelectorAll('th.sortable');
+
+            headers.forEach(header => {
+                header.addEventListener('click', function() {
+                    const tbody = table.querySelector('tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const columnIndex = Array.from(header.parentNode.children).indexOf(header);
+                    const isAscending = header.classList.contains('asc');
+
+                    // Remove sort classes from all headers
+                    headers.forEach(h => h.classList.remove('asc', 'desc'));
+
+                    // Add new sort class
+                    header.classList.toggle('asc', !isAscending);
+                    header.classList.toggle('desc', isAscending);
+
+                    // Sort rows
+                    rows.sort((a, b) => {
+                        let aValue = a.cells[columnIndex].textContent.trim();
+                        let bValue = b.cells[columnIndex].textContent.trim();
+
+                        // Try numeric sort if both are numbers
+                        const aNum = parseFloat(aValue.replace(/[^\d.-]/g, ''));
+                        const bNum = parseFloat(bValue.replace(/[^\d.-]/g, ''));
+
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return isAscending ? aNum - bNum : bNum - aNum;
+                        }
+
+                        // String sort
+                        return isAscending
+                            ? aValue.localeCompare(bValue)
+                            : bValue.localeCompare(aValue);
+                    });
+
+                    // Re-append sorted rows
+                    rows.forEach(row => tbody.appendChild(row));
+                });
+            });
+        }
+
+        // Global Table Search
+        function initGlobalSearch() {
+            const searchInput = document.getElementById('globalSearch');
+            if (!searchInput) return;
+
+            let searchTimeout;
+            searchInput.addEventListener('input', function(e) {
+                clearTimeout(searchTimeout);
+                const searchTerm = e.target.value.toLowerCase().trim();
+
+                searchTimeout = setTimeout(() => {
+                    const tables = document.querySelectorAll('table tbody');
+
+                    tables.forEach(tbody => {
+                        const rows = tbody.querySelectorAll('tr');
+                        let visibleCount = 0;
+
+                        rows.forEach(row => {
+                            const text = row.textContent.toLowerCase();
+                            const isVisible = searchTerm === '' || text.includes(searchTerm);
+                            row.style.display = isVisible ? '' : 'none';
+                            if (isVisible) visibleCount++;
+                        });
+
+                        // Show "no results" if needed
+                        if (visibleCount === 0 && searchTerm !== '') {
+                            showInfo(`No results found for "${searchTerm}"`);
+                        }
+                    });
+                }, 300); // Debounce 300ms
+            });
+        }
+
+        // Dark Mode Toggle
+        function initDarkMode() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+
+            // Apply saved preference on load
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+
+            // Toggle handler
+            darkModeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                const isNowDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isNowDark);
+                darkModeToggle.innerHTML = isNowDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            });
+        }
+
         // Load initial data
         document.addEventListener('DOMContentLoaded', function() {
+            initDarkMode();
+            initGlobalSearch();
             loadOverviewData();
             loadFilters();
             loadPSBSalesFilter();
@@ -2518,9 +2835,9 @@
         });
 
         function showSection(section) {
-            // Hide all sections
+            // Hide all sections using class
             document.querySelectorAll('.content-section').forEach(el => {
-                el.style.display = 'none';
+                el.classList.remove('active');
             });
 
             // Remove active class from all nav links (including dropdowns)
@@ -2529,19 +2846,26 @@
             });
 
             // Show selected section
-            document.getElementById(section + '-section').style.display = 'block';
+            const selectedSection = document.getElementById(section + '-section');
+            if (selectedSection) {
+                selectedSection.classList.add('active');
+            }
 
             // Add active class to clicked nav link
             const clickedLink = event.target.closest('.nav-link');
-            clickedLink.classList.add('active');
+            if (clickedLink) {
+                clickedLink.classList.add('active');
+            }
 
             // If the link is inside a dropdown, expand the dropdown
-            const parentCollapse = clickedLink.closest('.collapse');
-            if (parentCollapse) {
-                const collapseId = parentCollapse.id;
-                const dropdownToggle = document.querySelector(`[data-bs-target="#${collapseId}"]`);
-                if (dropdownToggle && !dropdownToggle.getAttribute('aria-expanded') || dropdownToggle.getAttribute('aria-expanded') === 'false') {
-                    const bsCollapse = new bootstrap.Collapse(parentCollapse, { toggle: true });
+            if (clickedLink) {
+                const parentCollapse = clickedLink.closest('.collapse');
+                if (parentCollapse) {
+                    const collapseId = parentCollapse.id;
+                    const dropdownToggle = document.querySelector(`[data-bs-target="#${collapseId}"]`);
+                    if (dropdownToggle && (dropdownToggle.getAttribute('aria-expanded') === 'false')) {
+                        const bsCollapse = new bootstrap.Collapse(parentCollapse, { toggle: true });
+                    }
                 }
             }
 
@@ -3444,8 +3768,8 @@
                 tbody.appendChild(tr);
             });
 
-            // Enable sorting
-            makeSortable('customers-table');
+            // Enable sorting on table headers
+            initTableSorting('customers-table');
         }
 
         function applyFilters() {
@@ -4461,9 +4785,7 @@
 
             // Check if file is selected
             if (!fileInput.files || fileInput.files.length === 0) {
-                uploadResult.style.display = 'block';
-                uploadResult.className = 'alert alert-danger mt-3';
-                uploadResult.innerHTML = '<i class="fas fa-times-circle me-2"></i>Pilih file terlebih dahulu!';
+                showError('Pilih file terlebih dahulu!');
                 return;
             }
 
@@ -4475,18 +4797,14 @@
 
                 // Validate file size (16MB)
                 if (file.size > 16 * 1024 * 1024) {
-                    uploadResult.style.display = 'block';
-                    uploadResult.className = 'alert alert-danger mt-3';
-                    uploadResult.innerHTML = `<i class="fas fa-times-circle me-2"></i>File "${file.name}" terlalu besar! Maksimal 16MB per file.`;
+                    showError(`File "${file.name}" terlalu besar! Maksimal 16MB per file.`);
                     return;
                 }
 
                 // Validate file extension
                 const fileName = file.name.toLowerCase();
                 if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.csv')) {
-                    uploadResult.style.display = 'block';
-                    uploadResult.className = 'alert alert-danger mt-3';
-                    uploadResult.innerHTML = `<i class="fas fa-times-circle me-2"></i>File "${file.name}" harus format .xls, .xlsx, atau .csv!`;
+                    showError(`File "${file.name}" harus format .xls, .xlsx, atau .csv!`);
                     return;
                 }
             }
@@ -4514,7 +4832,10 @@
                 uploadBtn.disabled = false;
 
                 if (data.success) {
-                    // Show success message
+                    // Show success toast
+                    showSuccess('Upload berhasil! Dashboard akan di-refresh...');
+
+                    // Show success message in alert box
                     uploadResult.style.display = 'block';
                     uploadResult.className = 'alert alert-success mt-3';
                     let message = `
@@ -4557,13 +4878,13 @@
 
                     // Auto reload overview after 2 seconds
                     setTimeout(() => {
-                        uploadResult.innerHTML += '<br><i class="fas fa-sync-alt me-2"></i>Dashboard akan di-refresh...';
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
+                        location.reload();
                     }, 2000);
                 } else {
-                    // Show error message
+                    // Show error toast
+                    showError(data.message || 'Upload gagal!');
+
+                    // Show error message in alert box
                     uploadResult.style.display = 'block';
                     uploadResult.className = 'alert alert-danger mt-3';
                     uploadResult.innerHTML = `
